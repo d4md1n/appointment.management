@@ -31,18 +31,18 @@ public class AppointmentManagement {
             printer.printAvailableInstructions();
             String value = safeReadLine(bufferedReader).orElse(NON_VALUE);
             if (value.equals(InputOptions.SHOW.getValue())) {
-                showAppointments();
+                showAppointmentsFlow();
             } else if (value.equals(InputOptions.CREATE.getValue())) {
-                createAppointment();
+                createAppointmentFlow();
             } else if (value.equals(InputOptions.DELETE.getValue())) {
-                deleteAppointment();
+                deleteAppointmentFlow();
             } else if (value.equals(InputOptions.EXIT.getValue())) {
                 break;
             }
         }
     }
 
-    private void deleteAppointment() {
+    private void deleteAppointmentFlow() {
         Optional<Integer> parsedAppointmentId = getParsedAppointmentIdToDelete(printer, bufferedReader);
         if (parsedAppointmentId.isPresent()) {
             appointmentService.deleteAppointment(parsedAppointmentId.get());
@@ -63,7 +63,7 @@ public class AppointmentManagement {
         return Optional.ofNullable(parsedAppointmentId);
     }
 
-    private void createAppointment() {
+    private void createAppointmentFlow() {
         Optional<AppointmentDto> optionalAppointmentDto = getAppointmentDto(printer, bufferedReader);
         if (optionalAppointmentDto.isPresent()) {
             Optional<Appointment> appointment = mapAppointmentDtoToAppointment(optionalAppointmentDto.get());
@@ -76,7 +76,7 @@ public class AppointmentManagement {
         }
     }
 
-    private void showAppointments() {
+    private void showAppointmentsFlow() {
         printer.printAppointmentsListPrompt();
         appointmentService.getAllAppointments().forEach(printer::printAppointment);
     }
