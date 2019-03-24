@@ -44,7 +44,7 @@ public class AppointmentManagement {
 
     private void deleteAppointment() {
         Optional<Integer> parsedAppointmentId = getParsedAppointmentIdToDelete(printer, bufferedReader);
-        if(parsedAppointmentId.isPresent()){
+        if (parsedAppointmentId.isPresent()) {
             appointmentService.deleteAppointment(parsedAppointmentId.get());
         }
     }
@@ -67,10 +67,12 @@ public class AppointmentManagement {
     private void createAppointment() {
         Optional<AppointmentDto> optionalAppointmentDto = getAppointmentDto(printer, bufferedReader);
         if (optionalAppointmentDto.isPresent()) {
-            Appointment appointment = mapAppointmentDtoToAppointment(optionalAppointmentDto.get());
-            boolean successfulCreation = appointmentService.createAppointment(appointment);
-            if(!successfulCreation) {
-                printer.printAppointmentCreationInvalidDateMessage();
+            Optional<Appointment> appointment = mapAppointmentDtoToAppointment(optionalAppointmentDto.get());
+            if (appointment.isPresent()){
+                boolean successfulCreation = appointmentService.createAppointment(appointment.get());
+                if (!successfulCreation) {
+                    printer.printAppointmentCreationInvalidDateMessage();
+                }
             }
         }
     }
@@ -80,10 +82,17 @@ public class AppointmentManagement {
         appointmentService.getAllAppointments().forEach(printer::printAppointment);
     }
 
-    private Appointment mapAppointmentDtoToAppointment(AppointmentDto appointmentDto) {
-        LocalDate parsedAppointmentDate = LocalDate.parse(appointmentDto.getDate());
-        int parsedAppointmentId = Integer.valueOf(appointmentDto.getId());
-        return new Appointment(parsedAppointmentId, appointmentDto.getDescription(), appointmentDto.getAssignee(), parsedAppointmentDate);
+    private Optional<Appointment> mapAppointmentDtoToAppointment(AppointmentDto appointmentDto) {
+        LocalDate parsedAppointmentDate;
+        int parsedAppointmentId;
+        try{
+            parsedAppointmentDate = LocalDate.parse(appointmentDto.getDate());
+            parsedAppointmentId = Integer.valueOf(appointmentDto.getId());
+        }catch (Exception e){
+            e.printStackTrace();
+            return Optional.empty();
+        }
+        return Optional.of(new Appointment(parsedAppointmentId, appointmentDto.getDescription(), appointmentDto.getAssignee(), parsedAppointmentDate));
     }
 
     private Optional<AppointmentDto> getAppointmentDto(Printer printer, BufferedReader bufferedReader) {
