@@ -1,5 +1,7 @@
 package com.appointment.management;
 
+import com.appointment.management.repository.AppointmentRepository;
+import com.appointment.management.repository.ListAppointmentRepository;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +30,7 @@ public class AppointmentManagementTest {
         final PipedInputStream testOutput = new PipedInputStream(out);
         this.printStream = new PrintStream(testInput);
         this.bufferedReader = new BufferedReader(new InputStreamReader(testOutput));
-        AppointmentManagement appointmentManagement = new AppointmentManagement(new PipedInputStream(testInput), new PrintStream(out));
+        AppointmentManagement appointmentManagement = new AppointmentManagement(new PipedInputStream(testInput), new PrintStream(out), new AppointmentService(new ListAppointmentRepository()));
         this.thread = new Thread(appointmentManagement::run);
         thread.start();
     }

@@ -2,8 +2,6 @@ package com.appointment.management;
 
 import com.appointment.management.domain.Appointment;
 import com.appointment.management.domain.InputOptions;
-import com.appointment.management.repository.AppointmentRepository;
-import com.appointment.management.repository.ListAppointmentRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,11 +16,13 @@ public class AppointmentManagement {
     private static final String NON_VALUE = "nonValue";
     private final Printer printer;
     private final BufferedReader bufferedReader;
-    private final ListAppointmentRepository appointmentRepository = new ListAppointmentRepository();
+    private final AppointmentService appointmentService;
 
-    public AppointmentManagement(InputStream inputStream, OutputStream outputStream) {
+
+    public AppointmentManagement(InputStream inputStream, OutputStream outputStream, AppointmentService appointmentService) {
         this.printer = new Printer(outputStream);
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        this.appointmentService = appointmentService;
     }
 
     void run() {
@@ -31,45 +31,53 @@ public class AppointmentManagement {
             printer.printAvailableInstructions();
             String value = safeReadLine(bufferedReader).orElse(NON_VALUE);
             if (value.equals(InputOptions.SHOW.getValue())) {
-                showAppointments(printer, appointmentRepository);
+                showAppointments();
             } else if (value.equals(InputOptions.CREATE.getValue())) {
-                createAppointment(printer, bufferedReader, appointmentRepository);
+                createAppointment();
             } else if (value.equals(InputOptions.DELETE.getValue())) {
-                deleteAppointment(printer, bufferedReader, appointmentRepository);
+                deleteAppointment();
             } else if (value.equals(InputOptions.EXIT.getValue())) {
                 break;
             }
         }
     }
 
-    private void deleteAppointment(Printer printer, BufferedReader bufferedReader, AppointmentRepository appointmentRepository) {
-        printer.printAppointmentDeleteIdPrompt();
-        Optional<String> appointmentId = safeReadLine(bufferedReader);
-        if (appointmentId.isPresent()) {
-            try {
-                int parsedAppointmentId = Integer.valueOf(appointmentId.get());
-                appointmentRepository.remove(parsedAppointmentId);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
+    private void deleteAppointment() {
+        Optional<Integer> parsedAppointmentId = getParsedAppointmentIdToDelete(printer, bufferedReader);
+        if(parsedAppointmentId.isPresent()){
+            appointmentService.deleteAppointment(parsedAppointmentId.get());
         }
     }
 
-    private void createAppointment(Printer printer, BufferedReader bufferedReader, AppointmentRepository appointmentRepository) {
+    private Optional<Integer> getParsedAppointmentIdToDelete(Printer printer, BufferedReader bufferedReader) {
+        printer.printAppointmentDeleteIdPrompt();
+        Optional<String> appointmentId = safeReadLine(bufferedReader);
+        Integer parsedAppointmentId = null;
+        if (appointmentId.isPresent()) {
+            try {
+                parsedAppointmentId = Integer.valueOf(appointmentId.get());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return Optional.empty();
+            }
+        }
+        return Optional.ofNullable(parsedAppointmentId);
+    }
+
+    private void createAppointment() {
         Optional<AppointmentDto> optionalAppointmentDto = getAppointmentDto(printer, bufferedReader);
         if (optionalAppointmentDto.isPresent()) {
             Appointment appointment = mapAppointmentDtoToAppointment(optionalAppointmentDto.get());
-            if (appointment.getDate().isAfter(LocalDate.now())) {
-                appointmentRepository.add(appointment);
-            } else {
+            boolean successfulCreation = appointmentService.createAppointment(appointment);
+            if(!successfulCreation) {
                 printer.printAppointmentCreationInvalidDateMessage();
             }
         }
     }
 
-    private void showAppointments(Printer printer, AppointmentRepository appointmentList) {
+    private void showAppointments() {
         printer.printAppointmentsListPrompt();
-        appointmentList.list().forEach(printer::printAppointment);
+        appointmentService.getAllAppointments().forEach(printer::printAppointment);
     }
 
     private Appointment mapAppointmentDtoToAppointment(AppointmentDto appointmentDto) {
