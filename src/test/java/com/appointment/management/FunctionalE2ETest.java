@@ -12,7 +12,7 @@ import java.io.PrintStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class ApplicationTest {
+public class FunctionalE2ETest {
 
     @Test
     public void testFullScenario() throws IOException, InterruptedException {

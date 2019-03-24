@@ -2,7 +2,9 @@ package com.appointment.management;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +14,13 @@ public class AppointmentManagement {
 
     private static final String NON_VALUE = "nonValue";
 
-    void run() {
+    void run(InputStream inputStream, OutputStream outputStream) {
+        Printer printer = new Printer(outputStream);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         List<Appointment> appointmentList = new ArrayList<>();
-        Printer printer = new Printer(System.out);
         printer.printWelcomeMessage();
         while (true) {
             printer.printAvailableInstructions();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             String value = safeReadLine(bufferedReader).orElse(NON_VALUE);
 
             if (value.equals(InputOptions.SHOW.value)) {
