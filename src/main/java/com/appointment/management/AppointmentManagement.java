@@ -7,27 +7,25 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class AppointmentManagement {
 
-    public static final String NON_VALUE = "nonValue";
+    private static final String NON_VALUE = "nonValue";
 
     void run() {
         List<Appointment> appointmentList = new ArrayList<>();
-        Printer printer = new Printer();
+        Printer printer = new Printer(System.out);
         printer.printWelcomeMessage();
         while (true) {
             printer.printAvailableInstructions();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            String value = safeReadLine(bufferedReader).orElse(NON_VALUE);
 
-            Optional<String> value = safeReadLine(bufferedReader);
-
-            if ("show".equals(value.orElse(NON_VALUE))) {
+            if (value.equals(InputOptions.SHOW.value)) {
                 printer.printAppointmentsListPrompt();
                 appointmentList.forEach(printer::printAppointment);
-            } else if ("create".equals(value.orElse(NON_VALUE))) {
-                Appointment appointment = new Appointment();
+            } else if (value.equals(InputOptions.CREATE.value)) {
+                //create flow
                 printer.printAppointmentCreateIdPrompt();
                 Optional<String> appointmentId = safeReadLine(bufferedReader);
                 printer.printAppointmentCreateDescriptionPrompt();
@@ -36,36 +34,28 @@ public class AppointmentManagement {
                 Optional<String> appointmentAssignee = safeReadLine(bufferedReader);
                 printer.printAppointmentCreateDatePrompt();
                 Optional<String> appointmentDate = safeReadLine(bufferedReader);
+                //end of create flow
 
-                if(!appointmentDate.isPresent()
-                        || !appointmentId.isPresent()
-                        || !appointmentAssignee.isPresent()
-                        || !appointmentDescription.isPresent()) {
+                if (createFlowValidationFails(appointmentId, appointmentDescription, appointmentAssignee, appointmentDate)) {
                     break;
                 }
-
+                //Parse necessary input
                 LocalDate parsedAppointmentDate = LocalDate.parse(appointmentDate.get());
                 int parsedAppointmentId = Integer.valueOf(appointmentId.get());
-
-                appointment.setDate(parsedAppointmentDate);
-                appointment.setAssignee(appointmentAssignee.get());
-                appointment.setDescription(appointmentDescription.get());
-                appointment.setId(parsedAppointmentId);
-
-                if (appointment.getDate().isBefore(LocalDate.now())) {
-                    printer.printAppointmentCreationInvalidDateMessage();
+                //enf of parsing
+                if (appointmentDateValidation(printer, parsedAppointmentDate)) {
                     continue;
                 }
 
+                Appointment appointment = createAppointment(appointmentDescription, appointmentAssignee, parsedAppointmentDate, parsedAppointmentId);
                 appointmentList.add(appointment);
-            } else if ("delete".equals(value.orElse(NON_VALUE))) {
+            } else if (value.equals(InputOptions.DELETE.value)) {
                 printer.printAppointmentDeleteIdPrompt();
-
                 Optional<String> appointmentId = safeReadLine(bufferedReader);
-                if(!appointmentId.isPresent()) {
+
+                if (!appointmentId.isPresent()) {
                     continue;
                 }
-
 
                 try {
                     int parsedAppointmentId = Integer.valueOf(appointmentId.get());
@@ -79,10 +69,29 @@ public class AppointmentManagement {
                 }
 
 
-            } else if ("exit".equals(value.orElse(NON_VALUE))) {
+            } else if (value.equals(InputOptions.EXIT.value)) {
                 break;
             }
         }
+    }
+
+    private Appointment createAppointment(Optional<String> appointmentDescription, Optional<String> appointmentAssignee, LocalDate parsedAppointmentDate, int parsedAppointmentId) {
+        return new Appointment(parsedAppointmentId, appointmentDescription.get(), appointmentAssignee.get(), parsedAppointmentDate);
+    }
+
+    private boolean appointmentDateValidation(Printer printer, LocalDate parsedAppointmentDate) {
+        if (parsedAppointmentDate.isBefore(LocalDate.now())) {
+            printer.printAppointmentCreationInvalidDateMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean createFlowValidationFails(Optional<String> appointmentId, Optional<String> appointmentDescription, Optional<String> appointmentAssignee, Optional<String> appointmentDate) {
+        return !appointmentDate.isPresent()
+                || !appointmentId.isPresent()
+                || !appointmentAssignee.isPresent()
+                || !appointmentDescription.isPresent();
     }
 
     private Optional<String> safeReadLine(BufferedReader bufferedReader) {

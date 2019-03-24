@@ -62,6 +62,7 @@ public class ApplicationTest {
         testPrint.println("exit");
         thread.join();
         //THEN
+
         assertFalse(thread.isAlive());
     }
 

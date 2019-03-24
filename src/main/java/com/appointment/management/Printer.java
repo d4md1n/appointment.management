@@ -1,49 +1,72 @@
 package com.appointment.management;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+
 public class Printer {
+
+    private final BufferedWriter bufferedWriter;
+
+    Printer(OutputStream outputStream){
+        this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+    }
+
     public void printAppointmentDeleteIdPrompt() {
-        System.out.println("enter the id of the appointment you want to delete");
+        safeWrite("enter the id of the appointment you want to delete");
     }
 
     public void printAppointmentCreationInvalidDateMessage() {
-        System.out.println("Appointment creation failed: appointment can not be in the past");
+        safeWrite("Appointment creation failed: appointment can not be in the past");
     }
 
     public void printAppointmentCreateAssigneePrompt() {
-        System.out.println("enter the assignee of the appointment you want to create");
+        safeWrite("enter the assignee of the appointment you want to create");
     }
 
     public void printAppointmentCreateDatePrompt() {
-        System.out.println("enter the date in yyyy-MM-dd format of the appointment you want to create");
+        safeWrite("enter the date in yyyy-MM-dd format of the appointment you want to create");
     }
 
     public void printAppointmentCreateDescriptionPrompt() {
-        System.out.println("enter the description of the appointment you want to create");
+        safeWrite("enter the description of the appointment you want to create");
     }
 
     public void printAppointmentCreateIdPrompt() {
-        System.out.println("enter the id of the appointment you want to create");
+        safeWrite("enter the id of the appointment you want to create");
     }
 
     public void printAppointment(Appointment appointment) {
-        System.out.println("appointment id: " + appointment.getId() + " " +
+        safeWrite("appointment id: " + appointment.getId() + " " +
                 "appointment date: " + appointment.getDate().toString() + " " +
                 "appointment assignee: " + appointment.getAssignee() + " " +
                 "appointment description: " + appointment.getDescription());
     }
 
     public void printAppointmentsListPrompt() {
-        System.out.println("The values below are your appointments");
+        safeWrite("The values below are your appointments");
     }
 
     public void printAvailableInstructions() {
-        System.out.println("enter \"show\" to see your appointments");
-        System.out.println("enter \"create\" to create an appointment");
-        System.out.println("enter \"delete\" to delete an appointment");
-        System.out.println("enter \"exit\" to exit the system");
+        safeWrite("enter \"show\" to see your appointments");
+        safeWrite("enter \"create\" to create an appointment");
+        safeWrite("enter \"delete\" to delete an appointment");
+        safeWrite("enter \"exit\" to exit the system");
     }
 
     public void printWelcomeMessage() {
-        System.out.println("Welcome.\nThis is the appointment management system.");
+        safeWrite("Welcome.");
+        safeWrite("This is the appointment management system.");
+    }
+
+    private void safeWrite(String string) {
+        try {
+            bufferedWriter.write(string);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
