@@ -13,11 +13,10 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.1.0'
 }
 mainClassName = 'com.appointment.management.Application'
 run {
-
     standardInput = System.in
-
 }
