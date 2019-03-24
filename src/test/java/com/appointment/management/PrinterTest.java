@@ -1,5 +1,6 @@
 package com.appointment.management;
 
+import com.appointment.management.domain.Appointment;
 import org.junit.Before;
 import org.junit.Test;
 

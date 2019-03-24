@@ -1,13 +1,16 @@
 package com.appointment.management;
 
+import com.appointment.management.domain.Appointment;
+import com.appointment.management.domain.InputOptions;
+import com.appointment.management.repository.AppointmentRepository;
+import com.appointment.management.repository.ListAppointmentRepository;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class AppointmentManagement {
@@ -27,13 +30,13 @@ public class AppointmentManagement {
         while (true) {
             printer.printAvailableInstructions();
             String value = safeReadLine(bufferedReader).orElse(NON_VALUE);
-            if (value.equals(InputOptions.SHOW.value)) {
+            if (value.equals(InputOptions.SHOW.getValue())) {
                 showAppointments(printer, appointmentRepository);
-            } else if (value.equals(InputOptions.CREATE.value)) {
+            } else if (value.equals(InputOptions.CREATE.getValue())) {
                 createAppointment(printer, bufferedReader, appointmentRepository);
-            } else if (value.equals(InputOptions.DELETE.value)) {
+            } else if (value.equals(InputOptions.DELETE.getValue())) {
                 deleteAppointment(printer, bufferedReader, appointmentRepository);
-            } else if (value.equals(InputOptions.EXIT.value)) {
+            } else if (value.equals(InputOptions.EXIT.getValue())) {
                 break;
             }
         }

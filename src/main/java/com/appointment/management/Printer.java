@@ -1,5 +1,7 @@
 package com.appointment.management;
 
+import com.appointment.management.domain.Appointment;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;

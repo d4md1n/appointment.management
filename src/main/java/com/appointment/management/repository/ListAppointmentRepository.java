@@ -1,4 +1,6 @@
-package com.appointment.management;
+package com.appointment.management.repository;
+
+import com.appointment.management.domain.Appointment;
 
 import java.util.ArrayList;
 import java.util.List;

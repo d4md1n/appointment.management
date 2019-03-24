@@ -1,8 +1,8 @@
-package com.appointment.management;
+package com.appointment.management.domain;
 
 import java.time.LocalDate;
 
-class Appointment {
+public class Appointment {
     private final int id;
     private final String description;
     private final String assignee;
