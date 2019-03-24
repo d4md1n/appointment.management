@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
@@ -13,8 +15,8 @@ import java.io.PrintStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class ApplicationTest {
-    
+public class AppointmentManagementTest {
+
     private PrintStream printStream;
     private BufferedReader bufferedReader;
     private Thread thread;
@@ -24,11 +26,10 @@ public class ApplicationTest {
         final PipedOutputStream testInput = new PipedOutputStream();
         final PipedOutputStream out = new PipedOutputStream();
         final PipedInputStream testOutput = new PipedInputStream(out);
-        System.setIn(new PipedInputStream(testInput));
-        System.setOut(new PrintStream(out));
         this.printStream = new PrintStream(testInput);
         this.bufferedReader = new BufferedReader(new InputStreamReader(testOutput));
-        this.thread = new Thread(() -> Application.main(new String[]{}));
+        AppointmentManagement appointmentManagement = new AppointmentManagement(new PipedInputStream(testInput), new PrintStream(out));
+        this.thread = new Thread(appointmentManagement::run);
         thread.start();
     }
 
@@ -82,6 +83,7 @@ public class ApplicationTest {
     @Test
     public void testInvalidDeleteInputDoesNotDeleteTheZeroIdAppointment() throws IOException, InterruptedException {
         //GIVEN
+
         assertFalse(bufferedReader.ready());
         assertEquals(bufferedReader.readLine(), "Welcome.");
         assertEquals(bufferedReader.readLine(), "This is the appointment management system.");

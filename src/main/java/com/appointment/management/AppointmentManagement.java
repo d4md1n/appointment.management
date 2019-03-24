@@ -13,8 +13,15 @@ import java.util.Optional;
 public class AppointmentManagement {
 
     private static final String NON_VALUE = "nonValue";
+    private final InputStream inputStream;
+    private final OutputStream outputStream;
 
-    void run(InputStream inputStream, OutputStream outputStream) {
+    public AppointmentManagement(InputStream inputStream, OutputStream outputStream) {
+        this.inputStream = inputStream;
+        this.outputStream = outputStream;
+    }
+
+    void run() {
         Printer printer = new Printer(outputStream);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         List<Appointment> appointmentList = new ArrayList<>();
