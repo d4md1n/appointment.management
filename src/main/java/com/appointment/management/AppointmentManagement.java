@@ -44,7 +44,7 @@ public class AppointmentManagement {
 
     private void deleteAppointment() {
         Optional<Integer> parsedAppointmentId = getParsedAppointmentIdToDelete(printer, bufferedReader);
-        if(parsedAppointmentId.isPresent()){
+        if (parsedAppointmentId.isPresent()) {
             appointmentService.deleteAppointment(parsedAppointmentId.get());
         }
     }
@@ -57,7 +57,6 @@ public class AppointmentManagement {
             try {
                 parsedAppointmentId = Integer.valueOf(appointmentId.get());
             } catch (NumberFormatException e) {
-                e.printStackTrace();
                 return Optional.empty();
             }
         }
@@ -67,10 +66,12 @@ public class AppointmentManagement {
     private void createAppointment() {
         Optional<AppointmentDto> optionalAppointmentDto = getAppointmentDto(printer, bufferedReader);
         if (optionalAppointmentDto.isPresent()) {
-            Appointment appointment = mapAppointmentDtoToAppointment(optionalAppointmentDto.get());
-            boolean successfulCreation = appointmentService.createAppointment(appointment);
-            if(!successfulCreation) {
-                printer.printAppointmentCreationInvalidDateMessage();
+            Optional<Appointment> appointment = mapAppointmentDtoToAppointment(optionalAppointmentDto.get());
+            if (appointment.isPresent()){
+                boolean successfulCreation = appointmentService.createAppointment(appointment.get());
+                if (!successfulCreation) {
+                    printer.printAppointmentCreationInvalidDateMessage();
+                }
             }
         }
     }
@@ -80,10 +81,16 @@ public class AppointmentManagement {
         appointmentService.getAllAppointments().forEach(printer::printAppointment);
     }
 
-    private Appointment mapAppointmentDtoToAppointment(AppointmentDto appointmentDto) {
-        LocalDate parsedAppointmentDate = LocalDate.parse(appointmentDto.getDate());
-        int parsedAppointmentId = Integer.valueOf(appointmentDto.getId());
-        return new Appointment(parsedAppointmentId, appointmentDto.getDescription(), appointmentDto.getAssignee(), parsedAppointmentDate);
+    private Optional<Appointment> mapAppointmentDtoToAppointment(AppointmentDto appointmentDto) {
+        LocalDate parsedAppointmentDate;
+        int parsedAppointmentId;
+        try{
+            parsedAppointmentDate = LocalDate.parse(appointmentDto.getDate());
+            parsedAppointmentId = Integer.valueOf(appointmentDto.getId());
+        }catch (Exception e){
+            return Optional.empty();
+        }
+        return Optional.of(new Appointment(parsedAppointmentId, appointmentDto.getDescription(), appointmentDto.getAssignee(), parsedAppointmentDate));
     }
 
     private Optional<AppointmentDto> getAppointmentDto(Printer printer, BufferedReader bufferedReader) {
@@ -95,13 +102,13 @@ public class AppointmentManagement {
         Optional<String> appointmentAssignee = safeReadLine(bufferedReader);
         printer.printAppointmentCreateDatePrompt();
         Optional<String> appointmentDate = safeReadLine(bufferedReader);
-        if (createFlowDataValidation(appointmentId, appointmentDescription, appointmentAssignee, appointmentDate)) {
+        if (createDataArePresent(appointmentId, appointmentDescription, appointmentAssignee, appointmentDate)) {
             return Optional.of(new AppointmentDto(appointmentId.get(), appointmentDescription.get(), appointmentAssignee.get(), appointmentDate.get()));
         }
         return Optional.empty();
     }
 
-    private boolean createFlowDataValidation(Optional<String> appointmentId, Optional<String> appointmentDescription, Optional<String> appointmentAssignee, Optional<String> appointmentDate) {
+    private boolean createDataArePresent(Optional<String> appointmentId, Optional<String> appointmentDescription, Optional<String> appointmentAssignee, Optional<String> appointmentDate) {
         return appointmentDate.isPresent() && appointmentId.isPresent() && appointmentAssignee.isPresent() && appointmentDescription.isPresent();
     }
 
