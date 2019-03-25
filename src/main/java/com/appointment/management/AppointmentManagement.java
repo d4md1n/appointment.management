@@ -25,7 +25,7 @@ public class AppointmentManagement {
         this.appointmentService = appointmentService;
     }
 
-    void run() {
+    public void run() {
         printer.printWelcomeMessage();
         while (true) {
             printer.printAvailableInstructions();
@@ -87,10 +87,10 @@ public class AppointmentManagement {
         try{
             parsedAppointmentDate = LocalDate.parse(appointmentDto.getDate());
             parsedAppointmentId = Integer.valueOf(appointmentDto.getId());
+            return Optional.of(new Appointment(parsedAppointmentId, appointmentDto.getDescription(), appointmentDto.getAssignee(), parsedAppointmentDate));
         }catch (Exception e){
             return Optional.empty();
         }
-        return Optional.of(new Appointment(parsedAppointmentId, appointmentDto.getDescription(), appointmentDto.getAssignee(), parsedAppointmentDate));
     }
 
     private Optional<AppointmentDto> getAppointmentDto(Printer printer, BufferedReader bufferedReader) {
